@@ -106,12 +106,10 @@ TArray<FVector> AHexActor::CalculateHexVertices(float HexSize)
 				FMath::RandRange(-RandomOffset, RandomOffset)
 			);
 			GlobalOffsetVert = LocalOffsetVert + HexData.Position;
-			LOG("Generated IdealVert {0} Local {1}", GlobalIdealVert.ToString(), LocalOffsetVert.ToString());
 		}
 		else
 		{
 			LocalOffsetVert = GlobalOffsetVert - HexData.Position;
-			LOG("Found IdealVert {0} Local {1}", GlobalIdealVert.ToString(), LocalOffsetVert.ToString());
 		}
 
 		LocalOffsetVertices.Add(LocalOffsetVert);

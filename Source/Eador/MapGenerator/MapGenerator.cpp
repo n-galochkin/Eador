@@ -34,18 +34,6 @@ void UMapGenerator::BeginPlay()
 	}
 }
 
-#if WITH_EDITOR
-void UMapGenerator::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
-{
-	Super::PostEditChangeProperty(PropertyChangedEvent);
-
-	if (PropertyChangedEvent.Property && PropertyChangedEvent.ChangeType != EPropertyChangeType::Interactive)
-	{
-		RegenerateMap();
-	}
-}
-#endif
-
 void UMapGenerator::RegenerateMap()
 {
 	LOG("Regenerating map...");
@@ -58,13 +46,26 @@ void UMapGenerator::GenerateLogicalMap()
 {
 	LogicalMap.Empty(); // Очищаем предыдущую карту, если она была
 
+	const int32 Seed = FMath::Rand();
+	float MinNoise = 1.0f;
+	float MaxNoise = 0.0f;
 	const float HexHeight = HexSize * FMath::Sqrt(3.f); // Высота гекса
 
 	for (int32 Q = 0; Q < MapSize.Width; ++Q)
 	{
 		for (int32 R = 0; R < MapSize.Height; ++R)
 		{
-			const float NoiseValue = FMath::PerlinNoise2D(FVector2D(Q * NoiseScale, R * NoiseScale));
+			float NoiseX = (Q + Seed) * NoiseScale;
+			float NoiseY = (R + Seed) * NoiseScale;
+			const float NoiseValue = FMath::PerlinNoise2D(FVector2D(NoiseX, NoiseY));
+			if (NoiseValue < MinNoise)
+			{
+				MinNoise = NoiseValue;
+			}
+			if (NoiseValue > MaxNoise)
+			{
+				MaxNoise = NoiseValue;
+			}
 			
 			const float CenterX = Q * HexSize * 1.5f;
 			const float CenterZ = R * HexHeight + (Q % 2 == 1 ? HexHeight * 0.5f : 0.0f);
@@ -78,6 +79,8 @@ void UMapGenerator::GenerateLogicalMap()
 			LogicalMap.Add(HexData);
 		}
 	}
+
+	LOG("Generated Hex with MinNoise {0} MaxNoise {1}", MinNoise, MaxNoise);
 }
 
 void UMapGenerator::InitializeHexActorPool(int32 InitialPoolSize)
