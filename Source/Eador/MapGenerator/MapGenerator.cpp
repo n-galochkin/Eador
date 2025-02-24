@@ -2,14 +2,12 @@
 
 #include "HexActor.h"
 #include "MapStructs.h"
-#include "ProceduralMeshActor.h"
 #include "Engine/AssetManager.h"
 #include "Math/UnrealMathUtility.h"
 
 #include "Logging/StructuredLog.h"
 
 DEFINE_LOG_CATEGORY_STATIC(EAMapGenerator, Log, All);
-
 #define CHANNEL(Verbosity, Format, ...) UE_LOGFMT(EAMapGenerator, Verbosity, Format, ##__VA_ARGS__)
 #define LOG(Format, ...) CHANNEL(Log, Format, ##__VA_ARGS__)
 #define WARNING(Format, ...) CHANNEL(Warning, Format, ##__VA_ARGS__)
@@ -74,8 +72,7 @@ void UMapGenerator::GenerateLogicalMap()
 
 			// Сохраняем данные о гексе
 			FHexTileData HexData;
-			HexData.Q = Q;
-			HexData.R = R;
+			HexData.MapCoordinates = FIntPoint(Q, R);
 			HexData.Position = Center;
 			HexData.TerrainType = NoiseValue < TerrainThresholds[EHexTerrainType::Grass] ? EHexTerrainType::Water : NoiseValue < TerrainThresholds[EHexTerrainType::Forest] ? EHexTerrainType::Grass : NoiseValue < TerrainThresholds[EHexTerrainType::Mountain] ? EHexTerrainType::Forest : EHexTerrainType::Mountain;;
 			LogicalMap.Add(HexData);
@@ -126,14 +123,24 @@ void UMapGenerator::SpawnHexActors()
 	}
 	ActiveHexActors.Empty();
 
+	// Карта для быстрого поиска HexActor по координатам (Q, R)
+	TMap<FIntPoint, AHexActor*> HexActorMap;
+
 	for (auto HexData : LogicalMap)
 	{
 		if (AHexActor* HexActor = GetHexActorFromPool())
 		{
 			HexActor->SetHexData(HexData);
 			HexActor->SetMaterial(MapAssets->TerrainMaterials[HexData.TerrainType].Get());
-			HexActor->GenerateMesh(HexSize);
 			ActiveHexActors.Add(HexActor);
+
+			HexActorMap.Add(HexData.MapCoordinates, HexActor);
 		}
+	}
+
+	for (AHexActor* HexActor : ActiveHexActors)
+	{
+		HexActor->FillHexNeighbors(HexActorMap);
+		HexActor->GenerateMesh(HexSize);
 	}
 }

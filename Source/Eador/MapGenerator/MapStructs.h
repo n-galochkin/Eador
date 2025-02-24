@@ -20,13 +20,10 @@ struct EADOR_API FHexTileData
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite)
-	int32 Q = 0;
-
-	UPROPERTY(BlueprintReadWrite)
-	int32 R = 0;
-
-	UPROPERTY(BlueprintReadWrite)
 	EHexTerrainType TerrainType = EHexTerrainType::Water;
+
+	UPROPERTY(BlueprintReadWrite)
+	FIntPoint MapCoordinates;
 
 	UPROPERTY(BlueprintReadWrite)
 	FVector Position;
