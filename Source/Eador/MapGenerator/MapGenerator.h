@@ -56,10 +56,11 @@ public:
 	UPROPERTY()
 	TArray<class AHexActor*> ActiveHexActors;
 
+	UFUNCTION(BlueprintCallable)
 	void RegenerateMap();
 
+private:
 	void GenerateLogicalMap();
-
 
 	void InitializeHexActorPool(int32 InitialPoolSize);
 	void AddNewHexActorToPool();

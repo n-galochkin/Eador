@@ -30,9 +30,6 @@ struct EADOR_API FHexTileData
 
 	UPROPERTY(BlueprintReadWrite)
 	FVector Position;
-
-	UPROPERTY(BlueprintReadWrite)
-	TArray<FVector> Vertices;
 };
 
 USTRUCT(BlueprintType)

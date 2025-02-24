@@ -5,12 +5,31 @@ AProceduralMeshActor::AProceduralMeshActor()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	ProceduralMeshComponent = CreateDefaultSubobject<UProceduralMeshComponent>("ProceduralMesh");
-	RootComponent = ProceduralMeshComponent;
+	SetRootComponent(ProceduralMeshComponent);
 }
 
 void AProceduralMeshActor::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+TArray<FVector> AProceduralMeshActor::GetHexVertices(float HexSize)
+{
+	// Углы для flat-top гекса
+	TArray<FVector> HexVertices;
+	for (int32 i = 0; i < 6; ++i)
+	{
+		float AngleDeg = 60.0f * i ;
+		float AngleRad = FMath::DegreesToRadians(AngleDeg);
+		HexVertices.Add(FVector(
+			HexSize * FMath::Cos(AngleRad),
+			0.0f,
+			HexSize * FMath::Sin(AngleRad)
+		));
+	}
+	HexVertices.Add(FVector()); // Центральная вершина
+
+	return HexVertices;
 }
 
 TArray<int32> AProceduralMeshActor::GetHexTriangles()
@@ -43,10 +62,9 @@ TArray<FVector2D> AProceduralMeshActor::GetHexUVs()
 	return UVs;
 }
 
-void AProceduralMeshActor::GenerateMesh() const
+void AProceduralMeshActor::GenerateMesh(float HexSize) const
 {
-	if (Vertices.Num() < 7) return;
-
+	static const TArray<FVector> Vertices = GetHexVertices(HexSize);
 	static const TArray<int32> Triangles = GetHexTriangles();
 	static const TArray<FVector2D> UVs = GetHexUVs();
 

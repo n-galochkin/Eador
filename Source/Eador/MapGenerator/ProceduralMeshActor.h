@@ -13,7 +13,7 @@ class EADOR_API AProceduralMeshActor : public AActor
 {
 	GENERATED_BODY()
 
-	TArray<FVector> Vertices;
+	TArray<FVector> GeneratedVertices;
 
 	UPROPERTY()
 	UProceduralMeshComponent* ProceduralMeshComponent;
@@ -21,11 +21,9 @@ class EADOR_API AProceduralMeshActor : public AActor
 public:
 	AProceduralMeshActor();
 
-	void SetVertices(const TArray<FVector>& InVertices) { Vertices = InVertices; }
-
 	void SetMaterial(UMaterialInterface* InMaterial) { Material = InMaterial; }
 
-	void GenerateMesh() const;
+	void GenerateMesh(float HexSize) const;
 
 
 protected:
@@ -35,6 +33,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	static TArray<FVector> GetHexVertices(float HexSize);
 	static TArray<int32> GetHexTriangles();
 	static TArray<FVector2D> GetHexUVs();
 };
